@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Query var quests: [Quest]
+
     var body: some View {
         NavigationStack {
             // Header
@@ -31,17 +34,17 @@ struct ContentView: View {
                         RoundedRectangle(cornerRadius: 10)
                             .fill(.blue)
                             .frame(width: 180, height: 120)
-                            .overlay(Text("Item").foregroundColor(.white))
+                            .overlay(Text("아카데미 튜토리얼").foregroundColor(.white))
                         
                         RoundedRectangle(cornerRadius: 10)
                             .fill(.blue)
                             .frame(width: 180, height: 120)
-                            .overlay(Text("Item").foregroundColor(.white))
+                            .overlay(Text("포스텍 시설 정복").foregroundColor(.white))
                     }
                     RoundedRectangle(cornerRadius: 10)
                         .fill(.blue)
                         .frame(width: 370, height: 76)
-                        .overlay(Text("Item").foregroundColor(.white))
+                        .overlay(Text("학생 계정 툴 신청").foregroundColor(.white))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -94,6 +97,8 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
-}
+ #Preview {
+     ContentView()
+         // Preview용 임시(in-memory) 컨테이너 주입
+         .modelContainer(for: Quest.self, inMemory: true)
+ }
