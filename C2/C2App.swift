@@ -11,23 +11,21 @@ import SwiftData
 @main
 struct C2App: App {
     // 커스텀 ModelContainer 생성 및 초기 데이터 주입
-    var sharedModelContainer: ModelContainer = {
+    static let sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Quest.self,
         ])
 
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
-        // do {
-        //     return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        // } catch {
-        //     fatalError("ModelContainer 생성 실패 \(error)")
-        // }
-
         do {
             // 1. 컨테이너 생성
             let container = try ModelContainer(for: schema, configurations: [modelConfiguration])
             let context = container.mainContext // 데이터를 다룰 Context
+            
+            // 데이터 초기화: 기존 퀘스트와 퀘스트 스텝 모두 삭제
+            try context.delete(model: Quest.self)
+            try context.delete(model: QuestStep.self)
             
             // 2. 기존 데이터가 있는지 확인
             let descriptor = FetchDescriptor<Quest>()
@@ -37,12 +35,15 @@ struct C2App: App {
             if existingQuests.isEmpty {
                 let defaultQuests = [
                     Quest(
-                        title: "아카데미 튜토리얼 완료하기",
+                        title: "임시 출입증과 장비 수령",
                         steps: [
-                            QuestStep(content: "입학식 참석", order: 0),
-                            QuestStep(content: "기숙사 짐 풀기", order: 1),
-                            QuestStep(content: "캠퍼스 투어", order: 2)
+                            QuestStep(content: "신분증을 지참하세요.", order: 0),
+                            QuestStep(content: "C5를 방문하세요.", order: 1),
+                            QuestStep(content: "6층으로 올라가세요.", order: 2),
+                            QuestStep(content: "데스크에서 임시 출입증을 수령하세요.", order: 3),
+                            QuestStep(content: "오디토리움에서 맥북과 아이폰을 수령하세요.", order: 4)
                         ],
+                        recommendedDate: Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date(),
                         category: .academy
                     ),
                     Quest(
@@ -51,6 +52,7 @@ struct C2App: App {
                             QuestStep(content: "도서관 출입증 발급", order: 0),
                             QuestStep(content: "학생 식당 메뉴 구경하기", order: 1)
                         ],
+                        recommendedDate: Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date(),
                         category: .postech
                     ),
                     Quest(
@@ -59,6 +61,7 @@ struct C2App: App {
                             QuestStep(content: "Xcode 설치", order: 0),
                             QuestStep(content: "Notion 학생 계정 연동", order: 1)
                         ],
+                        recommendedDate: Calendar.current.date(byAdding: .day, value: 4, to: Date()) ?? Date(),
                         category: .tool
                     )
                 ]
@@ -68,13 +71,13 @@ struct C2App: App {
                     context.insert(quest)
                 }
                 
-                // 즉시 저장
+                // 일단 즉시 저장해.
                 try context.save()
             }
             
             return container
         } catch {
-            fatalError("ModelContainer 생성 실패 \(error)")
+            fatalError("ModelContainer 생성 실패...! \(error)")
         }
     }()
 
@@ -83,6 +86,6 @@ struct C2App: App {
             ContentView()
         }
         // .modelContainer(for: Quest.self)
-        .modelContainer(sharedModelContainer) // 커스텀 컨테이너 주입
+        .modelContainer(C2App.sharedModelContainer) // 커스텀 컨테이너
     }
 }
